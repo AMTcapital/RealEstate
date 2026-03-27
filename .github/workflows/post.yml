@@ -29,8 +29,10 @@ jobs:
 
       - name: Commit updated JSON
         run: |
-          git config --global user.name 'LinkedIn-Bot'
-          git config --global user.email 'bot@noreply.github.com'
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add quotes.json
-          git commit -m "Update posted status" || echo "No changes to commit"
+          git commit -m "Update posted status [skip ci]" || echo "No changes to commit"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
