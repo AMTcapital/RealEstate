@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Ignore the temporary images created by the script
+*.jpg
+*.png
+
+# Just in case you ever accidentally name a file with your token
+.env
