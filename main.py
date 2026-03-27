@@ -37,11 +37,9 @@ def create_quote_image(text, author):
     return img_byte_arr.getvalue()
 
 def post_to_linkedin():
-    # 2. LOAD QUOTES
     with open('quotes.json', 'r') as f:
         quotes = json.load(f)
 
-    # Find the first unposted quote
     quote_data = next((q for q in quotes if not q.get('posted')), None)
     if not quote_data:
         print("No unposted quotes found!")
@@ -49,40 +47,60 @@ def post_to_linkedin():
 
     print(f"Processing: {quote_data['text'][:30]}...")
 
-    # 3. REGISTER UPLOAD (Step 1 of Handshake)
+    # 3. REGISTER UPLOAD
     register_url = "https://api.linkedin.com/rest/assets?action=registerUpload"
+    
+    # UPDATED PAYLOAD: More explicit structure for 2026
     register_payload = {
         "registerUploadRequest": {
             "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
             "owner": AUTHOR_URN,
-            "serviceRelationships": [{"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}]
+            "serviceRelationships": [
+                {
+                    "relationshipType": "OWNER",
+                    "identifier": "urn:li:userGeneratedContent"
+                }
+            ]
         }
     }
     
     reg_res = requests.post(register_url, headers=HEADERS, json=register_payload)
+    
+    # DEBUG: If this fails, we need to see the message
+    if reg_res.status_code != 200:
+        print(f"Registration Failed: {reg_res.status_code}")
+        print(f"Error Message: {reg_res.text}")
+        return
+
     reg_data = reg_res.json()
     
-    upload_url = reg_data['value']['uploadMechanism']["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]['uploadUrl']
-    asset_urn = reg_data['value']['asset']
+    # Navigate the JSON safely
+    try:
+        upload_mechanism = reg_data['value']['uploadMechanism']["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]
+        upload_url = upload_mechanism['uploadUrl']
+        asset_urn = reg_data['value']['asset']
+    except KeyError as e:
+        print(f"Mapping Error: Could not find {e} in response: {reg_data}")
+        return
 
-    # 4. UPLOAD IMAGE BINARY (Step 2 of Handshake)
+    # 4. UPLOAD IMAGE BINARY
     image_binary = create_quote_image(quote_data['text'], quote_data['author'])
+    # Note: Uploads often require ONLY the Bearer token, no version header
     upload_res = requests.put(upload_url, data=image_binary, headers={"Authorization": f"Bearer {TOKEN}"})
     
-    if upload_res.status_code != 201:
+    if upload_res.status_code not in [200, 201]:
         print(f"Image upload failed: {upload_res.status_code}")
         return
 
-    # 5. CREATE THE POST (Step 3 of Handshake)
+    # 5. CREATE THE POST
     post_url = "https://api.linkedin.com/rest/posts"
     post_payload = {
         "author": AUTHOR_URN,
-        "commentary": f"{quote_data['text']}\n\n#Motivation #Business #Success",
+        "commentary": f"{quote_data['text']}\n\n— {quote_data['author']}\n\n#Motivation #RealEstate #Success",
         "visibility": "PUBLIC",
         "lifecycleState": "PUBLISHED",
         "content": {
             "media": {
-                "title": "Wednesday Motivation",
                 "id": asset_urn
             }
         },
@@ -93,7 +111,6 @@ def post_to_linkedin():
     
     if final_res.status_code == 201:
         print("🚀 Successfully posted image to LinkedIn!")
-        # Update JSON status
         quote_data['posted'] = True
         with open('quotes.json', 'w') as f:
             json.dump(quotes, f, indent=2)
