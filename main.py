@@ -121,20 +121,16 @@ def post_to_linkedin():
     default_cta = "Success is built on better systems and consistent execution. Let's connect and grow together."
     cta_text = quote_data.get('cta', default_cta)
     # 1. BUILD THE FULL MESSAGE FIRST
-    full_message = (
-        f"💡 Insight of the Week:\n\n"
-        f"\"{quote_data['text']}\"\n\n"
-        f"- {quote_data['author']}\n\n"
-        f"🎯 {cta_text}\n\n"
-        f"--------------------------\n"
-        f"Alex Teplitskiy | REALTOR | Century21 AllPoints Realty\n"
-        f"Phone: (860) 543-9417 | alexteplitskiy@gmail.com\n"
-        f"Web: www.AlexSellsCT.com\n\n"
-        f"#Motivation #RealEstate #Systems #WestHartford"
-    )
+
     post_payload = {
         "author": AUTHOR_URN,
-        "commentary": str(full_message), # Force it to be a clean string
+        "commentary": (
+            "💡 Insight of the Week:\n\n"
+            f"\"{quote_data['text']}\"\n\n"
+            f"- {quote_data['author']}\n\n"
+            f"🎯 {cta_text}\n\n"
+            "Reach out today. 🤝"
+        ),
         "visibility": "PUBLIC",
         "lifecycleState": "PUBLISHED",
         "content": {
