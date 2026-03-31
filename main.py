@@ -47,52 +47,33 @@ def post_to_linkedin():
 
     print(f"Processing: {quote_data['text'][:30]}...")
 
-    # 3. REGISTER UPLOAD
-    register_url = "https://api.linkedin.com/rest/assets?action=registerUpload"
-    
-    # UPDATED PAYLOAD: More explicit structure for 2026
+    # 3. REGISTER UPLOAD (Updated for 2026 /images endpoint)
+    register_url = "https://api.linkedin.com/rest/images?action=initializeUpload"
     register_payload = {
-        "registerUploadRequest": {
-            "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-            "owner": AUTHOR_URN,
-            "serviceRelationships": [
-                {
-                    "relationshipType": "OWNER",
-                    "identifier": "urn:li:userGeneratedContent"
-                }
-            ]
+        "initializeUploadRequest": {
+            "owner": AUTHOR_URN
         }
     }
     
     reg_res = requests.post(register_url, headers=HEADERS, json=register_payload)
     
-    # DEBUG: If this fails, we need to see the message
     if reg_res.status_code != 200:
-        print(f"Registration Failed: {reg_res.status_code}")
-        print(f"Error Message: {reg_res.text}")
+        print(f"Registration Failed: {reg_res.status_code} - {reg_res.text}")
         return
 
     reg_data = reg_res.json()
-    
-    # Navigate the JSON safely
-    try:
-        upload_mechanism = reg_data['value']['uploadMechanism']["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]
-        upload_url = upload_mechanism['uploadUrl']
-        asset_urn = reg_data['value']['asset']
-    except KeyError as e:
-        print(f"Mapping Error: Could not find {e} in response: {reg_data}")
-        return
+    upload_url = reg_data['value']['uploadUrl']
+    image_urn = reg_data['value']['image']
 
     # 4. UPLOAD IMAGE BINARY
     image_binary = create_quote_image(quote_data['text'], quote_data['author'])
-    # Note: Uploads often require ONLY the Bearer token, no version header
     upload_res = requests.put(upload_url, data=image_binary, headers={"Authorization": f"Bearer {TOKEN}"})
     
     if upload_res.status_code not in [200, 201]:
         print(f"Image upload failed: {upload_res.status_code}")
         return
 
-    # 5. CREATE THE POST
+    # 5. CREATE THE POST (Updated for the new Image URN)
     post_url = "https://api.linkedin.com/rest/posts"
     post_payload = {
         "author": AUTHOR_URN,
@@ -101,7 +82,7 @@ def post_to_linkedin():
         "lifecycleState": "PUBLISHED",
         "content": {
             "media": {
-                "id": asset_urn
+                "id": image_urn # Using the new image URN here
             }
         },
         "distribution": {"feedDistribution": "MAIN_FEED"}
