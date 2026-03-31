@@ -107,4 +107,11 @@ def post_to_linkedin():
         print(f"Post failed: {final_res.status_code} - {final_res.text}")
 
 if __name__ == "__main__":
-    post_to_linkedin()
+    #post_to_linkedin()
+    # Manually trigger the image creation so you get your Artifact
+    with open('quotes.json', 'r') as f:
+        quotes = json.load(f)
+    quote_data = next((q for q in quotes if not q.get('posted')), None)
+    if quote_data:
+        create_quote_image(quote_data['text'], quote_data['author'])
+        print("Preview image created! Check GitHub Artifacts.")
