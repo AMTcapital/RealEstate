@@ -129,11 +129,10 @@ def post_to_linkedin():
             f"— {quote_data['author']}\n\n"
             f"🎯 {cta_text}\n\n"
             "--------------------------\n"
-            "Alex Teplitskiy | REALTOR\n"
-            "Century21 AllPoints Realty\n"
-            "(860)543-9417 | Licensed in CT\n"
-            "alexteplitskiy@gmail.com | www.alexsellsct.com\n\n"
-            "#Motivation #Systems #BusinessAutomation #WestHartford"
+            "Alex Teplitskiy | REALTOR | Century21 AllPoints\n"
+            "📞 (860) 543-9417 | 🌐 www.AlexSellsCT.com\n"
+            "✉️ alexteplitskiy@gmail.com\n\n"
+            "#Motivation #RealEstate #Systems #WestHartford"
         ),
         "visibility": "PUBLIC",
         "lifecycleState": "PUBLISHED",
