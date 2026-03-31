@@ -8,7 +8,7 @@ from io import BytesIO
 # 1. CONFIGURATION
 TOKEN = os.environ.get('L_TOKEN')
 AUTHOR_URN = os.environ.get('urn')
-VERSION = "202603" # Matches current LinkedIn API version
+VERSION = "202603" 
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "LinkedIn-Version": VERSION,
@@ -25,23 +25,21 @@ def create_quote_image(text, author):
     wrapped_text = wrapper.fill(text=text)
     full_content = f"\"{wrapped_text}\"\n\n— {author}"
     
-    # Draw simple text (Default font used for compatibility)
-    # Note: You can upload a .ttf font to your repo to make this look even better
+    # Draw simple text
     draw.multiline_text((540, 540), full_content, fill=(255, 255, 255), anchor="mm", align="center", spacing=20)
     
     # Add a subtle gold accent line at the bottom
     draw.line([(400, 900), (680, 900)], fill=(212, 175, 55), width=5)
     
-    img_byte_arr = BytesIO()
-    img.save(img_byte_arr, format='JPEG', quality=95)
-
-
-    # Existing save logic...
-    img_byte_arr = BytesIO()
-    img.save(img_byte_arr, format='JPEG', quality=95)
+    # Add small AMTcapital branding at the very bottom
+    draw.text((540, 950), "AMTcapital Systems", fill=(100, 100, 100), anchor="mm")
     
-    # ADD THIS LINE: It saves a physical file in the GitHub runner
+    # Save a physical file for the GitHub Artifact Preview
     img.save("linkedin_preview.jpg") 
+    
+    # Save to buffer for the API upload
+    img_byte_arr = BytesIO()
+    img.save(img_byte_arr, format='JPEG', quality=95)
     
     return img_byte_arr.getvalue()
 
@@ -56,7 +54,7 @@ def post_to_linkedin():
 
     print(f"Processing: {quote_data['text'][:30]}...")
 
-    # 3. REGISTER UPLOAD (Updated for 2026 /images endpoint)
+    # 3. REGISTER UPLOAD (2026 Images Endpoint)
     register_url = "https://api.linkedin.com/rest/images?action=initializeUpload"
     register_payload = {
         "initializeUploadRequest": {
@@ -76,13 +74,14 @@ def post_to_linkedin():
 
     # 4. UPLOAD IMAGE BINARY
     image_binary = create_quote_image(quote_data['text'], quote_data['author'])
+    # Upload requires only the Bearer token, usually no version header
     upload_res = requests.put(upload_url, data=image_binary, headers={"Authorization": f"Bearer {TOKEN}"})
     
     if upload_res.status_code not in [200, 201]:
         print(f"Image upload failed: {upload_res.status_code}")
         return
 
-    # 5. CREATE THE POST (Updated for the new Image URN)
+    # 5. CREATE THE POST
     post_url = "https://api.linkedin.com/rest/posts"
     post_payload = {
         "author": AUTHOR_URN,
@@ -91,7 +90,7 @@ def post_to_linkedin():
         "lifecycleState": "PUBLISHED",
         "content": {
             "media": {
-                "id": image_urn # Using the new image URN here
+                "id": image_urn 
             }
         },
         "distribution": {"feedDistribution": "MAIN_FEED"}
