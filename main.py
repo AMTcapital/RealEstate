@@ -123,20 +123,18 @@ def post_to_linkedin():
 
     post_payload = {
         "author": AUTHOR_URN,
-        "commentary": f"""💡 Insight of the Week:
-
-"{quote_data['text']}"
-
-— {quote_data['author']}
-
-🎯 {cta_text}
-
---------------------------
-Alex Teplitskiy | REALTOR | Century21 AllPoints
-📞 (860) 543-9417 | 🌐 www.AlexSellsCT.com
-✉️ alexteplitskiy@gmail.com
-
-#Motivation #RealEstate #Systems #WestHartford""",
+        "commentary": (
+            "💡 Insight of the Week:\n\n"
+            f"\"{quote_data['text']}\"\n\n"
+            f"— {quote_data['author']}\n\n"
+            f"🎯 {cta_text}\n\n"
+            "--------------------------\n"
+            "Alex Teplitskiy | REALTOR\n"
+            "Century21 AllPoints Realty\n"
+            "(860) 543-9417 | Licensed in CT\n"
+            "alexteplitskiy@gmail.com | www.alexsellsct.com\n\n"
+            "#Motivation #Systems #RealEstate #WestHartford"
+        ),
         "visibility": "PUBLIC",
         "lifecycleState": "PUBLISHED",
         "content": {
@@ -159,12 +157,3 @@ Alex Teplitskiy | REALTOR | Century21 AllPoints
 
 if __name__ == "__main__":
     post_to_linkedin()
-    # Manually trigger the image creation so you get your Artifact
-'''
-    with open('quotes.json', 'r') as f:
-        quotes = json.load(f)
-    quote_data = next((q for q in quotes if not q.get('posted')), None)
-    if quote_data:
-        create_quote_image(quote_data['text'], quote_data['author'])
-        print("Preview image created! Check GitHub Artifacts.")
-'''
