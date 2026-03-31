@@ -1,4 +1,5 @@
 name: Wednesday LinkedIn Post
+
 on:
   schedule:
     # Runs at 9:00 AM every Wednesday (UTC)
@@ -6,12 +7,16 @@ on:
   # Allows you to click "Run workflow" manually in the GitHub UI for testing
   workflow_dispatch:
 
+# Permissions must be at the same level as 'on' and 'jobs'
+permissions:
+  contents: write
+
 jobs:
   post-quote:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Updated to v4 for better security/speed
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,14 +36,14 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Only commit if there are actually changes to quotes.json
           git add quotes.json
-          # Only commit if there are actually changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "Update posted status [skip ci]"
-            # This line forces the use of the token for the push
-            git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" main
+            git push
           fi
 
       - name: Upload Image Preview
