@@ -123,17 +123,20 @@ def post_to_linkedin():
 
     post_payload = {
         "author": AUTHOR_URN,
-        "commentary": (
-            f"💡 Insight of the Week:\n\n"
-            f"\"{quote_data['text']}\"\n\n"
-            f"— {quote_data['author']}\n\n"
-            f"🎯 {cta_text}\n\n"
-            "--------------------------\n"
-            "Alex Teplitskiy | REALTOR | Century21 AllPoints\n"
-            "📞 (860) 543-9417 | 🌐 www.AlexSellsCT.com\n"
-            "✉️ alexteplitskiy@gmail.com\n\n"
-            "#Motivation #RealEstate #Systems #WestHartford"
-        ),
+        "commentary": f"""💡 Insight of the Week:
+
+"{quote_data['text']}"
+
+— {quote_data['author']}
+
+🎯 {cta_text}
+
+--------------------------
+Alex Teplitskiy | REALTOR | Century21 AllPoints
+📞 (860) 543-9417 | 🌐 www.AlexSellsCT.com
+✉️ alexteplitskiy@gmail.com
+
+#Motivation #RealEstate #Systems #WestHartford""",
         "visibility": "PUBLIC",
         "lifecycleState": "PUBLISHED",
         "content": {
