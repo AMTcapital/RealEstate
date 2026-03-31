@@ -127,7 +127,7 @@ def post_to_linkedin():
             f"💡 Insight of the Week:\n\n"
             f"\"{quote_data['text']}\"\n\n"
             f"— {quote_data['author']}\n\n"
-            f"🎯 {cta_text}\n\n" 
+            f"🎯 {cta_text}\n\n"
             "--------------------------\n"
             "Alex Teplitskiy | REALTOR\n"
             "Century21 AllPoints Realty\n"
