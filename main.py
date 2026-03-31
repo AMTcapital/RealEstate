@@ -62,9 +62,9 @@ def create_quote_image(text, author):
     # 5. BRANDING & GOLD ACCENT (Stable at the bottom)
     try:
         brand_font = ImageFont.truetype(font_path, 35)
-        draw.text((540, 960), "AMTcapital Systems", fill=(120, 120, 120), anchor="mm", font=brand_font)
+        draw.text((540, 960), "www.AlexSellsCT.com", fill=(120, 120, 120), anchor="mm", font=brand_font)
     except:
-        draw.text((540, 960), "AMTcapital Systems", fill=(120, 120, 120), anchor="mm")
+        draw.text((540, 960), "www.AlexSellsCT.com", fill=(120, 120, 120), anchor="mm")
 
     draw.line([(420, 910), (660, 910)], fill=(212, 175, 55), width=6)
     
@@ -73,6 +73,8 @@ def create_quote_image(text, author):
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='JPEG', quality=95)
     return img_byte_arr.getvalue()
+
+
 def post_to_linkedin():
     with open('quotes.json', 'r') as f:
         quotes = json.load(f)
@@ -113,9 +115,26 @@ def post_to_linkedin():
 
     # 5. CREATE THE POST
     post_url = "https://api.linkedin.com/rest/posts"
+    
+    # 🎯 AUTOMATED CTA LOGIC
+    # It checks the JSON first, then falls back to this general professional one
+    default_cta = "Success is built on better systems and consistent execution. Let's connect and grow together."
+    cta_text = quote_data.get('cta', default_cta)
+
     post_payload = {
         "author": AUTHOR_URN,
-        "commentary": f"{quote_data['text']}\n\n— {quote_data['author']}\n\n#Motivation #RealEstate #Success",
+        "commentary": (
+            f"💡 Insight of the Week:\n\n"
+            f"\"{quote_data['text']}\"\n\n"
+            f"— {quote_data['author']}\n\n"
+            f"🎯 {cta_text}\n\n" 
+            "--------------------------\n"
+            "Alex Teplitskiy | REALTOR\n"
+            "Century21 AllPoints Realty\n"
+            "(860)543-9417 | Licensed in CT\n"
+            "alexteplitskiy@gmail.com | www.alexsellsct.com\n\n"
+            "#Motivation #Systems #BusinessAutomation #WestHartford"
+        ),
         "visibility": "PUBLIC",
         "lifecycleState": "PUBLISHED",
         "content": {
