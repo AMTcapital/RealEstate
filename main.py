@@ -34,6 +34,15 @@ def create_quote_image(text, author):
     
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='JPEG', quality=95)
+
+
+    # Existing save logic...
+    img_byte_arr = BytesIO()
+    img.save(img_byte_arr, format='JPEG', quality=95)
+    
+    # ADD THIS LINE: It saves a physical file in the GitHub runner
+    img.save("linkedin_preview.jpg") 
+    
     return img_byte_arr.getvalue()
 
 def post_to_linkedin():
