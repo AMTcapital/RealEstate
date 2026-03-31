@@ -16,31 +16,32 @@ HEADERS = {
 }
 
 def create_quote_image(text, author):
-    """Creates a professional 1080x1080 image with centered text."""
-    img = Image.new('RGB', (1080, 1080), color=(28, 28, 28)) # Elegant Dark Charcoal
+    img = Image.new('RGB', (1080, 1080), color=(28, 28, 28))
     draw = ImageDraw.Draw(img)
     
-    # Text wrapping logic
-    wrapper = textwrap.TextWrapper(width=30) 
+    wrapper = textwrap.TextWrapper(width=25) 
     wrapped_text = wrapper.fill(text=text)
     full_content = f"\"{wrapped_text}\"\n\n— {author}"
     
-    # Draw simple text
-    draw.multiline_text((540, 540), full_content, fill=(255, 255, 255), anchor="mm", align="center", spacing=20)
+    try:
+        # FONT SIZE 65: Large and easy to read on LinkedIn mobile
+        quote_font = ImageFont.truetype("LibreFranklin-Bold.ttf", 65)
+        # BRANDING SIZE 35: Clear but secondary
+        brand_font = ImageFont.truetype("LibreFranklin-Bold.ttf", 35)
+        
+        draw.multiline_text((540, 500), full_content, fill=(255, 255, 255), anchor="mm", align="center", spacing=25, font=quote_font)
+        draw.text((540, 960), "AMTcapital Systems", fill=(120, 120, 120), anchor="mm", font=brand_font)
+        
+    except Exception as e:
+        print(f"Font loading failed: {e}")
+        draw.multiline_text((540, 500), full_content, fill=(255, 255, 255), anchor="mm", align="center")
+
+    # Gold Accent Line
+    draw.line([(420, 910), (660, 910)], fill=(212, 175, 55), width=6)
     
-    # Add a subtle gold accent line at the bottom
-    draw.line([(400, 900), (680, 900)], fill=(212, 175, 55), width=5)
-    
-    # Add small AMTcapital branding at the very bottom
-    draw.text((540, 950), "AMTcapital Systems", fill=(100, 100, 100), anchor="mm")
-    
-    # Save a physical file for the GitHub Artifact Preview
     img.save("linkedin_preview.jpg") 
-    
-    # Save to buffer for the API upload
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='JPEG', quality=95)
-    
     return img_byte_arr.getvalue()
 
 def post_to_linkedin():
