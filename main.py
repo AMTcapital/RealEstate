@@ -16,30 +16,56 @@ HEADERS = {
 }
 
 def create_quote_image(text, author):
-    img = Image.new('RGB', (1080, 1080), color=(28, 28, 28))
+    """Creates a professional 1080x1080 image with dynamic font scaling."""
+    img = Image.new('RGB', (1080, 1080), color=(28, 28, 28)) 
     draw = ImageDraw.Draw(img)
     
-    wrapper = textwrap.TextWrapper(width=25) 
-    wrapped_text = wrapper.fill(text=text)
-    full_content = f"\"{wrapped_text}\"\n\n— {author}"
+    full_content = f"\"{text}\"\n\n— {author}"
     
-    try:
-        # FONT SIZE 65: Large and easy to read on LinkedIn mobile
-        quote_font = ImageFont.truetype("LibreFranklin-Bold.ttf", 65)
-        # BRANDING SIZE 35: Clear but secondary
-        brand_font = ImageFont.truetype("LibreFranklin-Bold.ttf", 35)
+    # 1. Start with a large font size
+    font_size = 75 
+    font_path = "LibreFranklin-Bold.ttf"
+    
+    # 2. Dynamic Scaling Loop
+    # This shrinks the font until the text fits comfortably
+    while font_size > 30:
+        try:
+            quote_font = ImageFont.truetype(font_path, font_size)
+        except:
+            quote_font = ImageFont.load_default()
+            break
+            
+        # Adjust wrapping based on font size (smaller font = more characters per line)
+        char_width = 22 if font_size > 60 else 30
+        wrapper = textwrap.TextWrapper(width=char_width, break_long_words=False)
+        wrapped_text = wrapper.fill(text=full_content)
         
-        draw.multiline_text((540, 500), full_content, fill=(255, 255, 255), anchor="mm", align="center", spacing=25, font=quote_font)
-        draw.text((540, 960), "AMTcapital Systems", fill=(120, 120, 120), anchor="mm", font=brand_font)
+        # Check the size of the wrapped block
+        bbox = draw.multiline_textbbox((0, 0), wrapped_text, font=quote_font, align="center", spacing=20)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
         
-    except Exception as e:
-        print(f"Font loading failed: {e}")
-        draw.multiline_text((540, 500), full_content, fill=(255, 255, 255), anchor="mm", align="center")
+        # If it fits within 850px width and 650px height, we stop shrinking
+        if text_width < 850 and text_height < 650:
+            break
+        font_size -= 5
 
-    # Gold Accent Line
+    # 3. Draw the final balanced text
+    draw.multiline_text((540, 480), wrapped_text, fill=(255, 255, 255), anchor="mm", align="center", spacing=20, font=quote_font)
+    
+    # 4. Branding & Gold Accent
+    try:
+        brand_font = ImageFont.truetype(font_path, 35)
+        draw.text((540, 960), "AMTcapital Systems", fill=(120, 120, 120), anchor="mm", font=brand_font)
+    except:
+        draw.text((540, 960), "AMTcapital Systems", fill=(120, 120, 120), anchor="mm")
+
     draw.line([(420, 910), (660, 910)], fill=(212, 175, 55), width=6)
     
+    # Save for Preview Artifact
     img.save("linkedin_preview.jpg") 
+    
+    # Save for LinkedIn Upload
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='JPEG', quality=95)
     return img_byte_arr.getvalue()
